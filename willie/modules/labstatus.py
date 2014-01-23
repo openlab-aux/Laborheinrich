@@ -4,14 +4,19 @@
 the labstatus module for OpenLab Augsburg
 
 """
-from willie.module import commands, example
+import willie.module
+from willie.module import commands
 import urllib
 import json
+import time
+import thread
 
+api_url = 'http://api.openlab-augsburg.de/data.json'
+#api_url = 'http://files.michiwend.com/fakeapi/data.json'
 
-def is_lab_open():
+def lab_is_open():
 
-    http_obj = urllib.urlopen('http://api.openlab-augsburg.de/data.json')
+    http_obj = urllib.urlopen(api_url)
     json_data = http_obj.read()
     
     values = json.loads(json_data)
@@ -21,15 +26,32 @@ def is_lab_open():
     return values['open']
 
 
+
+lab_was_open = lab_is_open()
+@willie.module.interval(10)
+def lurk(bot):
+    
+    global lab_was_open
+
+    if '#openlab-aux' in bot.channels:
+            
+        if( lab_is_open() and not lab_was_open ):
+            bot.msg('#openlab-aux', 'NEUER LAB-STATUS: geoeffnet!')
+        elif ( not lab_is_open() and lab_was_open ):
+            bot.msg('#openlab-aux', 'NEUER LAB-STATUS: geschlossen.')
+        
+    lab_was_open = lab_is_open()
+        
+
+
 @commands('status')
-#@example('.status')
 def print_status(bot, trigger):
     """
     heinrich sagt dir, ob das OpenLab geoeffnet ist
     """
-    if( is_lab_open() ):
+    if( lab_is_open() ):
         bot.say("Lab-Status: geoeffnet!")
     else:
-        bot.say("Lab-Status: geschlossen :(")
+        bot.say("Lab-Status: geschlossen.")
 
 
