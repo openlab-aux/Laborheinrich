@@ -32,13 +32,13 @@ lab_was_open = lab_is_open()
 def lurk(bot):
     
     global lab_was_open
+         
+    for channel in bot.channels:
 
-    if '#openlab-aux' in bot.channels:
-            
         if( lab_is_open() and not lab_was_open ):
-            bot.msg('#openlab-aux', 'NEUER LAB-STATUS: geoeffnet!')
+            bot.msg(channel, 'NEUER LAB-STATUS: geoeffnet!')
         elif ( not lab_is_open() and lab_was_open ):
-            bot.msg('#openlab-aux', 'NEUER LAB-STATUS: geschlossen.')
+            bot.msg(channel, 'NEUER LAB-STATUS: geschlossen.')
         
     lab_was_open = lab_is_open()
         
