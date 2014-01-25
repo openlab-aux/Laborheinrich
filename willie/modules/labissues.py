@@ -50,7 +50,7 @@ def check_config(bot):
         return True
 
 
-@module.commands('issues', 'whatdo')
+@module.commands('issues')
 def list_issues(bot, trigger):
     """Lists the first first three issues with the highest priority."""
 
