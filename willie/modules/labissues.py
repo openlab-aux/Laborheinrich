@@ -8,9 +8,6 @@ from willie import module
 import requests
 import functools
 
-USER = "openlab-aux"
-REPO = "orgafoo"
-
 def get_issues(user, repo):
     res = requests.get('https://api.github.com/repos/{}/{}/issues'
                          .format(user, repo))
@@ -45,24 +42,31 @@ def map_to_priority(issues, coefficients):
         for i in issues
     ], key=lambda i: i[1], reverse=True)
 
-def check_config(bot):
-    if bot.config.has_option('labissues', 'coefficients'):
-        return True
 
+def config_get(bot, section, option, default=None, list=False):
+    if bot.config.has_option(section, option):
+        if not list:
+            return getattr(getattr(bot.config, section), option)
+        else:
+            return getattr(bot.config, section).get_list(option)
 
 @module.commands('issues')
 def list_issues(bot, trigger):
     """Lists the first first three issues with the highest priority."""
 
-    if check_config(bot):
-        coeffs = bot.config.labissues.get_list('coefficients')
-        coeffs = {
-            entry.split(":")[0]: float(entry.split(":")[1])
-            for entry in coeffs
-        }
+    coeffs = config_get(bot, 'labissues', 'coefficients', [], list=True)
+    coeffs = {
+        entry.split(":")[0]: float(entry.split(":")[1])
+        for entry in coeffs
+    }
+    user = config_get(bot, 'labissues', 'user')
+    repo = config_get(bot, 'labissues', 'repo')
+    
+    if user and repo:
+        issues = get_issues(user, repo)
+        prio_issues = map_to_priority(issues, coeffs)
+        [bot.say("{} (pri: {}): {}".format(i[0]['title'], i[1], i[0]['url']))
+         for i in prio_issues[:3]]
     else:
-        coeffs = []
-    issues = get_issues(USER, REPO)
-    prio_issues = map_to_priority(issues, coeffs)
-    [bot.say("{} (pri: {}): {}".format(i[0]['title'], i[1], i[0]['url']))
-     for i in prio_issues[:3]]
+        return bot.say("labissues not configured correctly, make sure there is "
+                       "a user and a repo.")
