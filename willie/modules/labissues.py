@@ -1,5 +1,5 @@
 """
-labissues.py - Lists the labs issues by priority
+labissues.py - Lists the lab's issues by priority
 Author: Profpatsch
 """
 
@@ -49,8 +49,11 @@ def check_config(bot):
     if bot.config.has_option('labissues', 'coefficients'):
         return True
 
-@module.commands('whatdo', 'issues')
-def issues(bot, trigger):
+
+@module.commands('issues', 'whatdo')
+def list_issues(bot, trigger):
+    """Lists the first first three issues with the highest priority."""
+
     if check_config(bot):
         coeffs = bot.config.labissues.get_list('coefficients')
         coeffs = {
