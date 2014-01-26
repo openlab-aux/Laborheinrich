@@ -68,14 +68,15 @@ def list_issues(bot, trigger):
     repo = args[0] or config_get(bot, 'labissues', 'repo')
     user = config_get(bot, 'labissues', 'user')
 
-    print(repo)
-
-    # coeffs = config_get(bot, 'labissues', 'coefficients', [], is_list=True)
-    # coeffs = {
-    #     entry.split(":")[0]: float(entry.split(":")[1])
-    #     for entry in coeffs
-    # }
-    coeffs = {}
+    try:
+        coeffs = config_get(bot, 'labissues','{}.coefficients'.format(repo),
+                            [], is_list=True)
+        coeffs = {
+            entry.split(":")[0]: float(entry.split(":")[1])
+            for entry in coeffs
+        }
+    except ValueError:
+        coeffs = {}
     
     if user and repo:
         issues = None
@@ -85,8 +86,10 @@ def list_issues(bot, trigger):
             return bot.say(e.message)
         prio_issues = map_to_priority(issues, coeffs)
 
-        [bot.say("{} (pri: {}): {}".format(i[0]['title'], i[1], i[0]['url']))
+        [bot.say("{} (pri: {}): {}".format(i[0]['title'],
+                                           float(i[1]), i[0]['url']))
          for i in prio_issues[:3]]
     else:
         return bot.say("labissues not configured correctly, make sure there is "
                        "a user and a repo.")
+
