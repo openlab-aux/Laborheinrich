@@ -93,3 +93,20 @@ def list_issues(bot, trigger):
         return bot.say("labissues not configured correctly, make sure there is "
                        "a user and a repo.")
 
+
+def configure(config):
+    import sys
+    
+    config.option("Would you like to configure labissues")
+    section = 'labissues'
+    config.interactive_add(section, 'user', "Github username:")
+    config.interactive_add(section, 'repo', "Default repository:")
+    print("Coefficients map Github issue tags to priorities.")
+    print("They are specified like this: bug:4.2")
+    while True:
+        if config.option("Would you like to add coefficients for another repo"):
+            repo = raw_input("Repo name:")
+            config.add_list(section, '{}.coefficients'.format(repo),
+                            "Repo {}".format(repo), "Coefficient:")
+        else:
+            break
