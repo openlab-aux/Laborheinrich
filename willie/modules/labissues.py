@@ -1,3 +1,4 @@
+# coding: utf-8
 """
 labissues.py - Lists the lab's issues by priority
 Author: Profpatsch
@@ -12,6 +13,9 @@ def get_issues(user, repo):
     res = requests.get('https://api.github.com/repos/{}/{}/issues'
                          .format(user, repo))
     issues = res.json()
+    if isinstance(issues, dict):
+        if issues.get('message', "") == "Not Found":
+            raise ValueError("Repo doesn’t exist.")
     return [
         {
             "title": i["title"],
@@ -51,20 +55,31 @@ def config_get(bot, section, option, default=None, list=False):
             return getattr(bot.config, section).get_list(option)
 
 @module.commands('issues')
+@module.example('.issues')
+@module.example('.issues repo')
 def list_issues(bot, trigger):
-    """Lists the first first three issues with the highest priority."""
+    """Lists the first first three issues with the highest priority. The second argument can be a repo."""
+
+    args = trigger.group(2)
+    args = args.split(" ") if args else [None]
+    repo = args[0] or config_get(bot, 'labissues', 'repo')
+    user = config_get(bot, 'labissues', 'user')
+    
 
     coeffs = config_get(bot, 'labissues', 'coefficients', [], list=True)
     coeffs = {
         entry.split(":")[0]: float(entry.split(":")[1])
         for entry in coeffs
     }
-    user = config_get(bot, 'labissues', 'user')
-    repo = config_get(bot, 'labissues', 'repo')
     
     if user and repo:
-        issues = get_issues(user, repo)
+        issues = None
+        try:
+            issues = get_issues(user, repo)
+        except ValueError as e:
+            return bot.say(e.message)
         prio_issues = map_to_priority(issues, coeffs)
+
         [bot.say("{} (pri: {}): {}".format(i[0]['title'], i[1], i[0]['url']))
          for i in prio_issues[:3]]
     else:
