@@ -47,12 +47,15 @@ def map_to_priority(issues, coefficients):
     ], key=lambda i: i[1], reverse=True)
 
 
-def config_get(bot, section, option, default=None, list=False):
+def config_get(bot, section, option, default=None, is_list=False):
     if bot.config.has_option(section, option):
-        if not list:
+        if not is_list:
             return getattr(getattr(bot.config, section), option)
         else:
             return getattr(bot.config, section).get_list(option)
+    else:
+        raise ValueError("Option {} does not exist in {}."
+                         .format(option, section))
 
 @module.commands('issues')
 @module.example('.issues')
@@ -64,13 +67,15 @@ def list_issues(bot, trigger):
     args = args.split(" ") if args else [None]
     repo = args[0] or config_get(bot, 'labissues', 'repo')
     user = config_get(bot, 'labissues', 'user')
-    
 
-    coeffs = config_get(bot, 'labissues', 'coefficients', [], list=True)
-    coeffs = {
-        entry.split(":")[0]: float(entry.split(":")[1])
-        for entry in coeffs
-    }
+    print(repo)
+
+    # coeffs = config_get(bot, 'labissues', 'coefficients', [], is_list=True)
+    # coeffs = {
+    #     entry.split(":")[0]: float(entry.split(":")[1])
+    #     for entry in coeffs
+    # }
+    coeffs = {}
     
     if user and repo:
         issues = None

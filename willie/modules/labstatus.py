@@ -1,4 +1,4 @@
-# -*- coding: utf8 -*-
+# coding: utf-8
 """
 
 the labstatus module for OpenLab Augsburg
@@ -36,7 +36,7 @@ def lurk(bot):
     for channel in bot.channels:
 
         if( lab_is_open() and not lab_was_open ):
-            bot.msg(channel, 'NEUER LAB-STATUS: geoeffnet!')
+            bot.msg(channel, 'NEUER LAB-STATUS: geöffnet!')
         elif ( not lab_is_open() and lab_was_open ):
             bot.msg(channel, 'NEUER LAB-STATUS: geschlossen.')
         
