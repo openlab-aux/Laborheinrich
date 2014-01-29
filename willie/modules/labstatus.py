@@ -1,4 +1,4 @@
-# coding: utf-8
+# -*- coding: utf-8 -*-
 """
 
 the labstatus module for OpenLab Augsburg
@@ -8,21 +8,31 @@ import willie.module
 from willie.module import commands
 import urllib
 import json
-import time
-import thread
 
 
+# default values if nothing is configured
 API_URL = 'http://api.openlab-augsburg.de/data.json'
-#API_URL = 'http://files.michiwend.com/fakeapi/data.json'
+INTERVAL = 10
+
+
+def setup(bot):
+
+    if bot.config.has_option('labstatus', 'api_url'):
+        global API_URL
+        API_URL = bot.config.labstatus.api_url
+
+    if bot.config.has_option('labstatus', 'update_interval'):
+        global INTERVAL
+        INTERVAL = bot.config.labstatus.interval
 
 
 class LabAPIHandler:
 
+    def __init__(self, url):
+        self.__url = url
+
     def update_data(self):
-
-        global API_URL
-
-        http_obj = urllib.urlopen(API_URL)
+        http_obj = urllib.urlopen(self.__url)
         json_data = http_obj.read()
         self.__values = json.loads(json_data)
         http_obj.close()
@@ -39,21 +49,22 @@ class LabAPIHandler:
             return int(clients_value)
 
 
-# check every 10 seconds if state has changed
 lab_was_open = False
-@willie.module.interval(10)
+@willie.module.interval(INTERVAL)
 def lurk(bot):
 
     global lab_was_open
+    global API_URL
 
-    handler = LabAPIHandler()
+    handler = LabAPIHandler(API_URL)
     handler.update_data()
 
     lab_is_open = handler.get_lab_state()
 
     for channel in bot.channels:
+
         if( lab_is_open and not lab_was_open ):
-            bot.msg(channel, 'NEUER LAB-STATUS: geöffnet!')
+            bot.msg(channel, 'NEUER LAB-STATUS: geoeffnet!')
         elif ( not lab_is_open and lab_was_open ):
             bot.msg(channel, 'NEUER LAB-STATUS: geschlossen.')
 
@@ -66,7 +77,9 @@ def print_status(bot, trigger):
     heinrich sagt dir, ob das OpenLab geoeffnet ist
     """
 
-    handler = LabAPIHandler()
+    global API_URL
+
+    handler = LabAPIHandler(API_URL)
     handler.update_data()
 
     if( handler.get_lab_state() ):
