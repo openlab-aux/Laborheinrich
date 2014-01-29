@@ -4,6 +4,8 @@
 the labstatus module for OpenLab Augsburg
 
 """
+from __future__ import unicode_literals
+
 import willie.module
 from willie.module import commands
 import urllib
@@ -64,7 +66,7 @@ def lurk(bot):
     for channel in bot.channels:
 
         if( lab_is_open and not lab_was_open ):
-            bot.msg(channel, 'NEUER LAB-STATUS: geoeffnet!')
+            bot.msg(channel, 'NEUER LAB-STATUS: geöffnet!')
         elif ( not lab_is_open and lab_was_open ):
             bot.msg(channel, 'NEUER LAB-STATUS: geschlossen.')
 
@@ -74,7 +76,7 @@ def lurk(bot):
 @commands('status')
 def print_status(bot, trigger):
     """
-    heinrich sagt dir, ob das OpenLab geoeffnet ist
+    heinrich sagt dir, ob das OpenLab geöffnet ist
     """
 
     global API_URL
@@ -83,6 +85,6 @@ def print_status(bot, trigger):
     handler.update_data()
 
     if( handler.get_lab_state() ):
-        bot.say("Lab-Status: geoeffnet. | aktive Geraete: " + `handler.get_active_clients()` )
+        bot.say("Lab-Status: geöffnet. | aktive Geräte: " + `handler.get_active_clients()` )
     else:
         bot.say("Lab-Status: geschlossen.")
