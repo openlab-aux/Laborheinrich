@@ -69,6 +69,6 @@ def labping(bot):
         if Rundumleuchte.light_up():
             bot.say('Rundumleuchte wurde für ' + str(Rundumleuchte.interval) + ' Sekunden aktiviert!')
             return
-
-        bot.say(trigger.nick + ': Konnte Rundumleuchte nicht aktivieren, ich versuch´s noch einmal...')
-        Rundumleuchte.re_connect()
+        if i == 0:
+            bot.say(trigger.nick + ': Konnte Rundumleuchte nicht aktivieren, ich versuch´s noch einmal...')
+            Rundumleuchte.re_connect()
