@@ -14,30 +14,32 @@ from willie.module import commands
 
 class Rundumleuchte:
 
-    self._serial_dev = None
+    _serial_dev = None
+    _dev_file = ''
 
     @staticmethod
-    def connect(self, dev_file):
+    def connect(dev_file):
         try:
-            self._serial_dev = serial.Serial(dev_file, 9600, timeout=1)
+            Rundumleuchte._serial_dev = serial.Serial(dev_file, 9600, timeout=1)
+            Rundumleuchte.dev_file = dev_file
         except:
             raise Exception('error: Rundumleuchte connected?')
 
     @staticmethod
-    def re_connect(self, bot):
+    def re_connect():
         try:
             # close an existing connection before
             # trying to reconnect
-            self._serial_dev.close()
+            Rundumleuchte._serial_dev.close()
         except:
             pass
 
-        connect()
+        connect(Rundumleuchte.dev_file)
 
     @staticmethod
-    def light_up(self):
+    def light_up():
         try:
-            serial_dev.write(str(self.interval))
+            serial_dev.write(str(Rundumleuchte.interval))
         except serial.SerialException:
             return False
 
