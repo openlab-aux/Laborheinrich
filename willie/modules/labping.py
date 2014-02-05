@@ -1,51 +1,72 @@
 # -*- coding: utf8 -*-
 
-from __future__ import unicode_literals
-import serial
-
 """
 
 the labping module for OpenLab Augsburg
 
 """
+
+from __future__ import unicode_literals
+
+import serial
 from willie.module import commands
 
 
-serial_dev = None
-ltime = 5
+class Rundumleuchte:
 
-def re_connect():
-    global serial_dev
-    
+    self._serial_dev = None
 
-    try:
-        serial_dev.close() # close an existing connection
-    except:
-        pass
+    @staticmethod
+    def connect(self, dev_file):
+        try:
+            self._serial_dev = serial.Serial(dev_file, 9600, timeout=1)
+        except:
+            raise Exception('error: Rundumleuchte connected?')
 
-    try:
-        serial_dev = serial.Serial('/dev/lights', 9600, timeout=1)
-    except:
-        raise Exception('fatal: rundumleuchte connected?')
+    @staticmethod
+    def re_connect(self, bot):
+        try:
+            # close an existing connection before
+            # trying to reconnect
+            self._serial_dev.close()
+        except:
+            pass
+
+        connect()
+
+    @staticmethod
+    def light_up(self):
+        try:
+            serial_dev.write(str(self.interval))
+        except serial.SerialException:
+            return False
+
+        return True
 
 
 def setup(bot):
-    re_connect()
+    if bot.config.has_option('rundumleuchte', 'device'):
+
+        Rundumleuchte.connect(bot.config.rundumleuchte.device)
+
+        if bot.config.has_option('rundumleuchte', 'interval'):
+            Rundumleuchte.interval = bot.config.rundumleuchte.interval
+        else:
+            Rundumleuchte.interval = 5
+    else:
+        raise ConfigurationError('labping not configured')
 
 
 @commands('labping')
-def ping_openlab(bot, trigger):
+def labping(bot):
     """
     heinrich lässt die Rundumleuchte im OpeLab aufleuchten
     """
+    # do it twice if first try fails
+    for i in range(2):
+        if Rundumleuchte.light_up():
+            bot.say('Rundumleuchte wurde für ' + str(Rundumleuchte.interval) + ' Sekunden aktiviert!')
+            return
 
-    global ltime
-
-    try:
-        serial_dev.write(str(ltime))
-    except serial.SerialException:
-        bot.say(trigger.nick + ': Keine Verbindung zur Rundumleuchte :( Versuche es nochmal.')
-        re_connect()
-        return
-
-    bot.say('Rundumleuchte wurde für ' + str(ltime) + ' Sekunden aktiviert')
+        bot.say(trigger.nick + ': Konnte Rundumleuchte nicht aktivieren, ich versuch´s noch einmal...')
+        Rundumleuchte.re_connect()
