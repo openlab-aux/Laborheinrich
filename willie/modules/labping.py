@@ -59,7 +59,7 @@ def setup(bot):
         raise ConfigurationError('labping module not configured')
 
 
-@commands('labping')
+@commands('labping', 'pinglab')
 def labping(bot, trigger):
     """
     heinrich lässt die Rundumleuchte im OpeLab aufleuchten
