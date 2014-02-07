@@ -39,7 +39,7 @@ class Rundumleuchte:
     @staticmethod
     def light_up():
         try:
-            serial_dev.write(str(Rundumleuchte.lightup_interval))
+            Rundumleuchte._serial_dev.write(str(Rundumleuchte.lightup_interval))
         except serial.SerialException:
             return False
 
