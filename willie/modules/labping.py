@@ -16,6 +16,7 @@ class Rundumleuchte:
 
     _serial_dev = None
     _dev_file = ''
+    light_up_interval = 5
 
     @staticmethod
     def connect(dev_file):
@@ -53,8 +54,6 @@ def setup(bot):
 
         if bot.config.has_option('rundumleuchte', 'lightup_interval'):
             Rundumleuchte.light_up_interval = bot.config.rundumleuchte.lightup_interval
-        else:
-            Rundumleuchte.light_up_interval = 5
     else:
         raise ConfigurationError('labping module not configured')
 
