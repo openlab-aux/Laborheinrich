@@ -40,7 +40,7 @@ class Rundumleuchte:
     def light_up():
         try:
             Rundumleuchte._serial_dev.write(str(Rundumleuchte.lightup_interval))
-        except serial.SerialException:
+        except serial.SerialException, ValueError:
             return False
 
         return True
