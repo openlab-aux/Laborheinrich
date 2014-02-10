@@ -10,6 +10,8 @@ import willie.module
 from willie.module import commands
 import urllib
 import json
+import time
+import datetime
 
 
 # default values if nothing is configured
@@ -50,6 +52,36 @@ class LabAPIHandler:
         else:
             return int(clients_value)
 
+    def get_last_change(self):
+        return self.__values['lastchange']
+
+
+def uptime(timestamp1, timestamp2):
+
+    dtime   = int(timestamp2 - timestamp1)
+
+    days    = int(dtime / 86400)
+    rest    = dtime % 86400
+
+    hours   = int(rest / 3600)
+    rest    = rest % 3600
+
+    minutes = int(rest / 60)
+    seconds = rest % 60
+
+    if days:
+        tstring = str(days)
+        if days>1:
+            tstring += ' Tage, '
+        else:
+            tstring += ' Tag, '
+    else:
+        tstring = ''
+
+    tstring += str(hours).zfill(2)+':'+str(minutes).zfill(2)+':'+str(seconds).zfill(2)
+
+    return tstring
+
 
 lab_was_open = False
 @willie.module.interval(INTERVAL)
@@ -85,6 +117,7 @@ def print_status(bot, trigger):
     handler.update_data()
 
     if( handler.get_lab_state() ):
-        bot.say("Lab-Status: geöffnet. | aktive Geräte: " + `handler.get_active_clients()` )
+        bot.say('Lab-Status: geöffnet. | aktive Geräte: ' + str(handler.get_active_clients())
+                + ' | Lab-Uptime: ' + uptime(handler.get_last_change(), time.time()))
     else:
-        bot.say("Lab-Status: geschlossen.")
+        bot.say('Lab-Status: geschlossen.')
