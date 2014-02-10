@@ -8,6 +8,7 @@ from __future__ import unicode_literals
 from willie import module
 import requests
 import functools
+import time
 
 def get_issues(user, repo):
     res = requests.get('https://api.github.com/repos/{}/{}/issues'
@@ -63,10 +64,28 @@ def config_get(bot, section, option, default=None, is_list=False):
 def list_issues(bot, trigger):
     """Lists the first first three issues with the highest priority. The second argument can be a repo."""
 
+    NO_OF_ISSUES = 3
+    ISSUE_RESET_TIME = 60 #s
+
     args = trigger.group(2)
     args = args.split(" ") if args else [None]
     repo = args[0] or config_get(bot, 'labissues', 'repo')
     user = config_get(bot, 'labissues', 'user')
+
+    # Set up a memory dict
+    if not bot.memory.contains("labissues_repo"):
+        bot.memory["labissues_repo"] = {}
+    mem = bot.memory["labissues_repo"]
+    # look if repo is already in the dict
+    if not mem.get(repo):
+        mem[repo] = {"timestamp": time.time(), "issue_no": 0}
+    # look up number for repo, increase, set timestamp
+    if (time.time() - mem[repo]["timestamp"] < ISSUE_RESET_TIME):
+        issue_no = mem[repo]["issue_no"]
+    else:
+        issue_no = 0
+    mem[repo]["timestamp"] = time.time()
+    mem[repo]["issue_no"] = issue_no + NO_OF_ISSUES
 
     try:
         coeffs = config_get(bot, 'labissues','{}.coefficients'.format(repo),
@@ -88,7 +107,7 @@ def list_issues(bot, trigger):
 
         [bot.say("{} (pri: {}): {}".format(i[0]['title'],
                                            float(i[1]), i[0]['url']))
-         for i in prio_issues[:3]]
+         for i in prio_issues[issue_no:issue_no+NO_OF_ISSUES]]
     else:
         return bot.say("labissues not configured correctly, make sure there is "
                        "a user and a repo.")
