@@ -5,9 +5,7 @@ tumblr module for heinrich
 """
 
 from __future__ import unicode_literals
-
 from willie.module import commands
-
 from pytumblr import TumblrRestClient
 
 class Tumblr:
@@ -26,11 +24,15 @@ def setup(bot):
 
 @commands('shit')
 def post(bot, trigger):
+    """
+    heinrich posts shit as a quote directly to http://shitopenlabsays.tumblr.com
+    """
     if trigger.admin:
-        quote = " ".join(trigger.args[1].split(" ")[1:])
+        quote = trigger.group(2).strip()
         Tumblr.api.create_quote('shitopenlabsays',
                                 type="quote",
                                 quote=quote)
         bot.say("Posted quote \"%s\" to http://shitopenlabsays.tumblr.com" % quote)
     else:
         bot.say("Nope, you're not allowed to post.")
+
