@@ -16,7 +16,6 @@ import time
 import datetime
 import string
 
-
 LURK_INTERVAL = 10
 
 def setup(bot):
@@ -28,6 +27,12 @@ def setup(bot):
 
     global LURK_INTERVAL
     LURK_INTERVAL = int(bot.config.labstatus.update_interval)
+    """
+    ToDo:
+    Check if interval from config file is applyed to the thread.
+    probably not because the lurk thread will be initialized before
+    the value is read from config file...
+    """
 
 class LabAPIHandler:
 
@@ -104,8 +109,8 @@ def lurk(bot):
     topic = string.replace(bot.config.labstatus.topic_draft, '$STATUS', status_str)
 
     for channel in bot.channels:
-        bot.msg(channel, 'NEUER LAB-STATUS: ' + status_str)
         bot.write(('TOPIC', channel + ' :' + string.replace(topic, '$CHANNEL', channel)))
+        bot.msg(channel, 'NEUER LAB-STATUS: ' + status_str)
 
     lab_was_open = lab_is_open
 
