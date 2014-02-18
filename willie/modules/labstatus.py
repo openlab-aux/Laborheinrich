@@ -17,10 +17,7 @@ import datetime
 import string
 
 
-# default values if nothing is configured
-API_URL = 'http://api.openlab-augsburg.de/data.json'
-INTERVAL = 10
-
+LURK_INTERVAL = 10
 
 def setup(bot):
 
@@ -29,11 +26,8 @@ def setup(bot):
     or not bot.config.has_option('labstatus', 'topic_draft'):
         raise willie.config.ConfigurationError('labstatus module not configured')
 
-    global INTERVAL
-    global API_URL
-    API_URL = bot.config.labstatus.api_url
-    INTERVAL = bot.config.labstatus.interval
-
+    global LURK_INTERVAL
+    LURK_INTERVAL = int(bot.config.labstatus.update_interval)
 
 class LabAPIHandler:
 
@@ -89,13 +83,12 @@ def uptime(timestamp1, timestamp2):
 
 
 lab_was_open = False
-@willie.module.interval(INTERVAL)
+@willie.module.interval(LURK_INTERVAL)
 def lurk(bot):
 
     global lab_was_open
-    global API_URL
 
-    handler = LabAPIHandler(API_URL)
+    handler = LabAPIHandler(bot.config.labstatus.api_url)
     handler.update_data()
 
     lab_is_open = handler.get_lab_state()
@@ -123,9 +116,7 @@ def print_status(bot, trigger):
     heinrich sagt dir, ob das OpenLab geöffnet ist
     """
 
-    global API_URL
-
-    handler = LabAPIHandler(API_URL)
+    handler = LabAPIHandler(bot.config.labstatus.api_url)
     handler.update_data()
 
     if( handler.get_lab_state() ):
