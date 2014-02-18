@@ -1,4 +1,4 @@
-# coding=utf-8
+#coding: utf8
 """This module has classes and functions that can help in writing tests.
 
 test_tools.py - Willie misc tools
@@ -7,6 +7,8 @@ Licensed under the Eiffel Forum License 2.
 
 https://willie.dftba.net
 """
+from __future__ import unicode_literals
+
 import sys
 import re
 
@@ -122,7 +124,7 @@ def insert_into_module(func, module_name, base_name, prefix):
     module = sys.modules[module_name]
     # Make sure the func method does not overwrite anything.
     for i in xrange(1000):
-        func.__name__ = "%s_%s_%s" % (prefix, base_name, i)
+        func.__name__ = str("%s_%s_%s" % (prefix, base_name, i))
         if not hasattr(module, func.__name__):
             break
     setattr(module, func.__name__, func)
