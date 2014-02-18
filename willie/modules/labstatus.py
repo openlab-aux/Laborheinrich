@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
+
 """
 
 the labstatus module for OpenLab Augsburg
 
 """
+
 from __future__ import unicode_literals
 
 import willie.module
@@ -12,6 +14,7 @@ import urllib
 import json
 import time
 import datetime
+import string
 
 
 # default values if nothing is configured
@@ -21,13 +24,15 @@ INTERVAL = 10
 
 def setup(bot):
 
-    if bot.config.has_option('labstatus', 'api_url'):
-        global API_URL
-        API_URL = bot.config.labstatus.api_url
+    if not bot.config.has_option('labstatus', 'api_url') \
+    or not bot.config.has_option('labstatus', 'update_interval') \
+    or not bot.config.has_option('labstatus', 'topic_draft'):
+        raise willie.config.ConfigurationError('labstatus module not configured')
 
-    if bot.config.has_option('labstatus', 'update_interval'):
-        global INTERVAL
-        INTERVAL = bot.config.labstatus.interval
+    global INTERVAL
+    global API_URL
+    API_URL = bot.config.labstatus.api_url
+    INTERVAL = bot.config.labstatus.interval
 
 
 class LabAPIHandler:
@@ -94,13 +99,20 @@ def lurk(bot):
     handler.update_data()
 
     lab_is_open = handler.get_lab_state()
+    status_str = ''
+
+    if( lab_is_open and not lab_was_open ):   # state changed to 'open'
+        status_str = 'geöffnet!'
+    elif( not lab_is_open and lab_was_open ): # state changed to 'closed'
+        status_str = 'geschlossen.'
+    else:                                     # nothing happend
+        return
+
+    topic = string.replace(bot.config.labstatus.topic_draft, '$STATUS', status_str)
 
     for channel in bot.channels:
-
-        if( lab_is_open and not lab_was_open ):
-            bot.msg(channel, 'NEUER LAB-STATUS: geöffnet!')
-        elif ( not lab_is_open and lab_was_open ):
-            bot.msg(channel, 'NEUER LAB-STATUS: geschlossen.')
+        bot.msg(channel, 'NEUER LAB-STATUS: ' + status_str)
+        bot.write(('TOPIC', channel + ' :' + string.replace(topic, '$CHANNEL', channel)))
 
     lab_was_open = lab_is_open
 
@@ -118,6 +130,6 @@ def print_status(bot, trigger):
 
     if( handler.get_lab_state() ):
         bot.say('Lab-Status: geöffnet. | aktive Geräte: ' + str(handler.get_active_clients())
-                + ' | Lab-Uptime: ' + uptime(handler.get_last_change(), time.time()))
+                )#+ ' | Geöffnet: ' + uptime(handler.get_last_change(), time.time()))
     else:
         bot.say('Lab-Status: geschlossen.')
