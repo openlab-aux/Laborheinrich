@@ -7,7 +7,7 @@ Twitter module for Heinrich
 from __future__ import unicode_literals
 
 from willie.module import commands
-
+import re
 from twython import Twython
 
 class Twitter:
@@ -21,14 +21,36 @@ def setup(bot):
                               bot.config.twitter.oauth_token_secret)
 
     else:
-        raise Exception('twitter module not configured')
+        raise willie.config.ConfigurationError('twitter module not configured')
+
+
+def tweet_len(tweet):
+    # returns the lenght of a tweet while taking unter account
+    # that each link counts 22 charakters
+
+    tweet_len = len(tweet)
+    links = re.findall(r'http[s]?://[\S]*', tweet) # extract all links
+
+    for link in links:
+        tweet_len -= len(link)
+        tweet_len += 22
+
+    return tweet_len
 
 
 @commands('tweet')
 def post(bot, trigger):
+
+    length = 0
+
     if trigger.admin:
-        tweet = " ".join(trigger.args[1].split(" ")[1:])
-        Twitter.api.update_status(status=tweet)
-        bot.say("Posted quote \"%s\" to @OpenLabAugsburg (http://twitter.com/OpenLabAugsburg)" % tweet)
+        tweet = trigger.group(2).strip()
+        length = tweet_len(tweet)
+
+        if length <= 140:
+            Twitter.api.update_status(status=tweet)
+            bot.say("Posted quote \"%s\" to @OpenLabAugsburg (http://twitter.com/OpenLabAugsburg)" % tweet)
+        else:
+            bot.say("Sorry, tweet is " + str(length - 140) + " charakters too long :(")
     else:
         bot.say("Nope, you're not allowed to post.")
