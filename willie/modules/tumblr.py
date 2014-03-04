@@ -31,7 +31,7 @@ def post(bot, trigger):
         quote = trigger.group(2).strip()
         Tumblr.api.create_quote('shitopenlabsays',
                                 type="quote",
-                                quote=quote.decode('utf-8')
+                                quote=quote.encode('utf-8'))
         bot.say("Posted quote \"%s\" to http://shitopenlabsays.tumblr.com" % quote)
     else:
         bot.say("Nope, you're not allowed to post.")
