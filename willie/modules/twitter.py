@@ -48,7 +48,7 @@ def post(bot, trigger):
         length = tweet_len(tweet)
 
         if length <= 140:
-            Twitter.api.update_status(status=tweet)
+            Twitter.api.update_status(status=tweet.encode('utf-8'))
             bot.say("Posted quote \"%s\" to @OpenLabAugsburg (http://twitter.com/OpenLabAugsburg)" % tweet)
         else:
             bot.say("Sorry, tweet is " + str(length - 140) + " charakters too long :(")
