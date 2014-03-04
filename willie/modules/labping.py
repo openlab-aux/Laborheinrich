@@ -10,7 +10,7 @@ from __future__ import unicode_literals
 
 import serial
 from willie.module import commands
-from willie.modules import flipdot_scroll_text
+from willie.modules.flipdot_scroll_text import scroll_text
 from willie.config import ConfigurationError
 
 
