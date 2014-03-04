@@ -33,7 +33,7 @@ def array2packet(a):
 
 def str2array(s):
     #font = ImageFont.load_default()
-    font = ImageFont.truetype("/usr/share/fonts/TTF/DejaVuSans-Bold.ttf", FONT_SIZE)
+    font = ImageFont.truetype("/home/heinrich/DejaVuSans-Bold.ttf", FONT_SIZE)
 
     img_width = font.getsize(s)[0]
     image     = Image.new("RGBA", (img_width,DISPLAY_SIZE[1]), C_BLACK)
