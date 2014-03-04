@@ -11,6 +11,7 @@ from __future__ import unicode_literals
 import serial
 from willie.module import commands
 import flipdot_scroll_text
+from willie.config import ConfigurationError
 
 
 class Rundumleuchte:
