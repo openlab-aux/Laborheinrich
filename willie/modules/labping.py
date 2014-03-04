@@ -10,6 +10,7 @@ from __future__ import unicode_literals
 
 import serial
 from willie.module import commands
+import flipdot_scroll_text
 
 
 class Rundumleuchte:
@@ -74,3 +75,5 @@ def labping(bot, trigger):
             Rundumleuchte.re_connect()
         else:
             bot.say(trigger.nick + ': Nein, nichts zu machen :(')
+
+    flipdot_scroll_text.scroll_text(trigger.group(2).strip())
