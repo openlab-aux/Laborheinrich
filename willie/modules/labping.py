@@ -10,6 +10,7 @@ from __future__ import unicode_literals
 
 import serial
 from willie.module import commands
+from willie.config import ConfigurationError
 
 
 class Rundumleuchte:
