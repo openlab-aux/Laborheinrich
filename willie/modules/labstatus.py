@@ -21,18 +21,9 @@ LURK_INTERVAL = 10
 def setup(bot):
 
     if not bot.config.has_option('labstatus', 'api_url') \
-    or not bot.config.has_option('labstatus', 'update_interval') \
     or not bot.config.has_option('labstatus', 'topic_draft'):
         raise willie.config.ConfigurationError('labstatus module not configured')
 
-    global LURK_INTERVAL
-    LURK_INTERVAL = int(bot.config.labstatus.update_interval)
-    """
-    ToDo:
-    Check if interval from config file is applyed to the thread.
-    probably not because the lurk thread will be initialized before
-    the value is read from config file...
-    """
     bot.memory['lab_was_open'] = False
 
 
