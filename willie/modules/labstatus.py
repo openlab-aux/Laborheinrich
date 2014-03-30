@@ -33,6 +33,8 @@ def setup(bot):
     probably not because the lurk thread will be initialized before
     the value is read from config file...
     """
+    bot.memory['lab_was_open'] = False
+
 
 class LabAPIHandler:
 
@@ -87,17 +89,15 @@ def uptime(timestamp1, timestamp2):
     return tstring
 
 
-lab_was_open = False
 @willie.module.interval(LURK_INTERVAL)
 def lurk(bot):
 
-    global lab_was_open
 
     handler = LabAPIHandler(bot.config.labstatus.api_url)
     handler.update_data()
 
-    lab_is_open = handler.get_lab_state()
-    status_str = ''
+        lab_is_open  = handler.get_lab_state()
+        lab_was_open = bot.memory['lab_was_open']
 
     if( lab_is_open and not lab_was_open ):   # state changed to 'open'
         status_str = 'geöffnet!'
@@ -112,7 +112,7 @@ def lurk(bot):
         bot.write(('TOPIC', channel + ' :' + string.replace(topic, '$CHANNEL', channel)))
         bot.msg(channel, 'NEUER LAB-STATUS: ' + status_str)
 
-    lab_was_open = lab_is_open
+        bot.memory['lab_was_open'] = lab_is_open
 
 
 @commands('status')
