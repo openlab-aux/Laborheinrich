@@ -10,13 +10,13 @@ from __future__ import unicode_literals
 
 import willie.module
 from willie.module import commands
-import urllib
+import urllib2
 import json
 import time
 import datetime
 import string
 
-LURK_INTERVAL = 10
+LURK_INTERVAL = 30
 
 def setup(bot):
 
@@ -34,7 +34,7 @@ class LabAPIHandler:
 
     def update_data(self):
         try:
-            http_obj = urllib.urlopen(self.__url)
+            http_obj = urllib2.urlopen(self.__url, timeout=2)
             json_data = http_obj.read()
             self.__values = json.loads(json_data)
             http_obj.close()
