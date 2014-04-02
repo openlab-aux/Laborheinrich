@@ -23,8 +23,13 @@ def setup(bot):
     if not bot.config.has_option('labstatus', 'api_url') \
     or not bot.config.has_option('labstatus', 'topic_draft'):
         raise willie.config.ConfigurationError('labstatus module not configured')
+    
+    handler = LabAPIHandler(bot.config.labstatus.api_url)
 
-    bot.memory['lab_was_open'] = False
+    if handler.update_data():
+        bot.memory['lab_was_open'] = handler.get_lab_state()
+    else:
+        raise Exception('API call failed')
 
 
 class LabAPIHandler:
