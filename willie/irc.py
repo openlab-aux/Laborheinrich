@@ -112,6 +112,10 @@ class Bot(asynchat.async_chat):
         A dictionary mapping channels to a ``Nick`` list of their voices,
         half-ops and ops.
         """
+        
+        self.reconnect_attempts = 0
+        self.max_reconnect_attempts = 23
+        self.reconnect_interval = 42
 
         #We need this to prevent error loops in handle_error
         self.error_count = 0
@@ -199,11 +203,17 @@ class Bot(asynchat.async_chat):
             self.writing_lock.release()
 
     def run(self, host, port=6667):
-        try:
-            self.initiate_connect(host, port)
-        except socket.error, e:
-            stderr('Connection error: %s' % e.strerror)
-            self.hasquit = True
+        while(self.reconnect_attempts < self.max_reconnect_attempts):
+            print("Trying to connect (%i/%i)" % (self.reconnect_attempts+1, self.max_reconnect_attempts))
+            try:
+                self.initiate_connect(host, port)
+            except socket.error, e:
+                stderr('Connection error: %s' % e.strerror)
+                self.hasquit = True
+                self.reconnect_attempts += 1
+                time.sleep(self.reconnect_interval)
+                if self.reconnect_attempts >= self.max_reconnect_attempts:
+                    self.hasquit = True
 
     def initiate_connect(self, host, port):
         stderr('Connecting to %s:%s...' % (host, port))
